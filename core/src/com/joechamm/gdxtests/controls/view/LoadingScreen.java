@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -28,6 +29,8 @@ import com.joechamm.gdxtests.controls.JCGdxTestControls;
 
 import com.joechamm.gdxtests.controls.asset.JCGdxAssetManager;
 
+import java.util.Locale;
+
 public class LoadingScreen implements Screen {
 
     private static final String TAG = LoadingScreen.class.getName ();
@@ -36,7 +39,8 @@ public class LoadingScreen implements Screen {
 
     private Stage stage;
     private Skin skin;
-    private ProgressBar progressBar;
+//    private ProgressBar progressBar;
+    private Label countDownLabel;
 
     // loading stages
     public final int LOAD_IMAGES = 0;
@@ -92,15 +96,19 @@ public class LoadingScreen implements Screen {
         Image lpTitleImage = new Image ( skin, "laser planes" );
         lpTitleImage.setScaling ( Scaling.fit );
 
-        progressBar = new ProgressBar ( progMin, progMax, 1f, false, skin, "loading-horizontal" );
+  //      progressBar = new ProgressBar ( progMin, progMax, 1f, false, skin, "loading-horizontal" );
+
+        countDownLabel = new Label ( "loading images...", skin, "med-br" );
 
         table.add ( lpTitleImage ).align ( Align.top ).pad ( padHeight / 2, padWidth / 2, padHeight / 2, padWidth / 2 );
         table.row ();
-        table.add ( progressBar ).align ( Align.center ).pad ( padHeight / 2, padWidth / 2, padHeight / 2, padWidth );
+//        table.add ( progressBar ).align ( Align.center ).pad ( padHeight / 2, padWidth / 2, padHeight / 2, padWidth ).grow ();
+//        table.row ();
+        table.add ( countDownLabel ).align ( Align.bottom ).maxSize ( 0.5f * Gdx.graphics.getWidth (), 0.5f * Gdx.graphics.getHeight () ).grow ();
 
         stage.addActor ( table );
 
-        progressBar.setValue ( 1.0f );
+//        progressBar.setValue ( 1.0f );
     }
 
     @Override
@@ -112,23 +120,27 @@ public class LoadingScreen implements Screen {
         if ( parent.assetManager.manager.update () ) {
             currentLoadingStage++;
 
-            progressBar.setValue ( (float)currentLoadingStage );
+//            progressBar.setValue ( (float)currentLoadingStage );
 
             switch ( currentLoadingStage ) {
                 case LOAD_FONTS:
                     Gdx.app.debug ( TAG, "Loading fonts..." );
+                    countDownLabel.setText ( "loading fonts..." );
                     parent.assetManager.queueAddFonts ();
                     break;
                 case LOAD_EFFECTS:
                     Gdx.app.debug ( TAG, "Loading effects..." );
+                    countDownLabel.setText ( "loading effects..." );
                     parent.assetManager.queueAddParticleEffects ();
                     break;
                 case LOAD_SOUNDS:
                     Gdx.app.debug ( TAG, "Loading sounds..." );
+                    countDownLabel.setText ( "loading sounds..." );
                     parent.assetManager.queueAddSounds ();
                     break;
                 case LOAD_MUSIC:
                     Gdx.app.debug ( TAG, "Loading music..." );
+                    countDownLabel.setText ( "loading music..." );
                     parent.assetManager.queueAddMusic ();
                     break;
                 case LOAD_FINISHED:
@@ -137,6 +149,11 @@ public class LoadingScreen implements Screen {
             }
 
             if ( currentLoadingStage >= LOAD_FINISHED ) {
+                String str = String.format ( Locale.getDefault (), "starting in %d seconds...",
+                                                  (int) Math.floor ( (float) countDown ) );
+
+                countDownLabel.setText ( str.subSequence ( 0, str.length () - 1 ) );
+
                 countDown -= delta;
                 currentLoadingStage = LOAD_FINISHED;
                 if(countDown < 0f) {

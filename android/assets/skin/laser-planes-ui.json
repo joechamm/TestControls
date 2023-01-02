@@ -174,8 +174,8 @@
 	"progress-bar-bl-01-empty": {
 		"name": "progress-bar-cl-01-empty",
 		"color": "SafehouseBlueMid",
-		"minWidth": 277,
-		"minHeight": 47
+//		"minWidth": 277,
+//		"minHeight": 47
 	},
 	"minus-bl": {
 		"name": "minus",
@@ -196,62 +196,62 @@
 	"slider-simple-knob": {
 		"name": "white-pixel",
 		"color": "SafehouseBlueMid",
-		"minWidth": 5,
-		"minHeight": 20
+//		"minWidth": 5,
+//		"minHeight": 20
 	},
 	"slider-simple-background": {
 		"name": "white-pixel",
 		"color": "Gray",
-		"minWidth": 200,
-		"minHeight": 2
+//		"minWidth": 200,
+//		"minHeight": 2
 	},
 	"slider-simple-vertical-background": {
 		"name": "white-pixel",
 		"color": "Gray",
-		"minWidth": 2,
-		"minHeight": 200
+//		"minWidth": 2,
+//		"minHeight": 200
 	},
 	"slider-simple-vertical-knob": {
 		"name": "white-pixel",
 		"color": "SafehouseBlueMid",
-		"minWidth": 20,
-		"minHeight": 5
+//		"minWidth": 20,
+//		"minHeight": 5
 	},
 	"scroll-bar-horizontal": {
 		"name": "white-pixel",
 		"color": "GrayVeryLight",
-		"minWidth": 50,
-		"minHeight": 4
+//		"minWidth": 50,
+//		"minHeight": 4
 	},
 	"scroll-bar-horizontal-knob": {
 		"name": "white-pixel",
 		"color": "SafehouseBlueMid",
-		"minWidth": 1,
-		"minHeight": 4
+//		"minWidth": 1,
+//		"minHeight": 4
 	},
 	"scroll-bar-vertical": {
 		"name": "white-pixel",
 		"color": "GrayVeryLight",
-		"minWidth": 4,
-		"minHeight": 50
+//		"minWidth": 4,
+//		"minHeight": 50
 	},
 	"scroll-bar-vertical-knob": {
 		"name": "white-pixel",
 		"color": "SafehouseBlueMid",
-		"minWidth": 4,
-		"minHeight": 1
+//		"minWidth": 4,
+//		"minHeight": 1
 	},
 	"progress-simple-knob": {
 		"name": "white-pixel",
 		"color": "SafehouseBlueMid",
-		"minWidth": 1,
-		"minHeight": 2
+//		"minWidth": 1,
+//		"minHeight": 2
 	},
 	"progress-simple-vertical-knob": {
 		"name": "white-pixel",
 		"color": "SafehouseBlueMid",
-		"minWidth": 2,
-		"minHeight": 1
+//		"minWidth": 2,
+//		"minHeight": 1
 	}
 },
 "TiledDrawable": {
