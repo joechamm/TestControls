@@ -10,6 +10,7 @@ import com.joechamm.gdxtests.controls.asset.JCGdxAssetManager;
 import com.joechamm.gdxtests.controls.audio.JCGdxAudioManager;
 import com.joechamm.gdxtests.controls.view.LoadingScreen;
 import com.joechamm.gdxtests.controls.view.MenuScreen;
+import com.joechamm.gdxtests.controls.view.PreferencesScreen;
 
 public class JCGdxTestControls extends Game {
 
@@ -18,6 +19,7 @@ public class JCGdxTestControls extends Game {
 	// game screens
 	private MenuScreen menuScreen;
 	private LoadingScreen loadingScreen;
+	private PreferencesScreen preferencesScreen;
 
 	// game screen indice
 	public static final int MENU = 0;
@@ -32,7 +34,7 @@ public class JCGdxTestControls extends Game {
 	public JCGdxAssetManager assetManager = new JCGdxAssetManager ();
 
 	// audio manager
-	JCGdxAudioManager audioManager = null;
+    public JCGdxAudioManager audioManager = null;
 
 	public void changeScreen(int screen) {
 		Gdx.app.debug ( TAG, "changeScreen" );
@@ -45,6 +47,8 @@ public class JCGdxTestControls extends Game {
 				break;
 			case PREFERENCES:
 				Gdx.app.debug ( TAG, "PREFERENCES" );
+				if(preferencesScreen == null) preferencesScreen = new PreferencesScreen ( this );
+				this.setScreen ( preferencesScreen );
 				// TODO
 				break;
 			case APPLICATION:
@@ -57,8 +61,6 @@ public class JCGdxTestControls extends Game {
 				break;
 		}
 	}
-
-
 
 	@Override
 	public void create () {

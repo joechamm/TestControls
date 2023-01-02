@@ -119,6 +119,7 @@ public class MenuScreen implements Screen {
             @Override
             public void changed ( ChangeEvent event, Actor actor ) {
                 Gdx.app.debug ( TAG, "Preferences Pressed..." );
+                parent.changeScreen ( JCGdxTestControls.PREFERENCES );
                 // TODO: implement
             }
         } );
@@ -127,6 +128,7 @@ public class MenuScreen implements Screen {
             @Override
             public void changed ( ChangeEvent event, Actor actor ) {
                 Gdx.app.debug ( TAG, "Exit Pressed..." );
+                Gdx.app.exit ();
                 // TODO: implement
             }
         } );
