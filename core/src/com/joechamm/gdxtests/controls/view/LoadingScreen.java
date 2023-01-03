@@ -51,7 +51,8 @@ public class LoadingScreen implements Screen {
     public final int LOAD_EFFECTS = 2;
     public final int LOAD_SOUNDS = 3;
     public final int LOAD_MUSIC = 4;
-    public final int LOAD_FINISHED = 5;
+    public final int LOAD_EXPLOSIONS = 5;
+    public final int LOAD_FINISHED = 6;
 
     private int currentLoadingStage = LOAD_IMAGES;
 
@@ -197,6 +198,11 @@ public class LoadingScreen implements Screen {
                         Gdx.app.error ( TAG, "OH NO! Something went wrong loading music." );
                         Gdx.app.exit ();
                     }
+                    break;
+                case LOAD_EXPLOSIONS:
+                    Gdx.app.debug ( TAG, "Loading explosions..." );
+                    countDownLabel.setText ( "loading explosions..." );
+                    parent.assetManager.queueAddExplosionImages ();
                     break;
                 case LOAD_FINISHED:
                     Gdx.app.debug ( TAG, "Finished loading..." );

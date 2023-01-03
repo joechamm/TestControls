@@ -1,13 +1,22 @@
 package com.joechamm.gdxtests.controls.asset;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.ParticleEffectLoader;
 import com.badlogic.gdx.assets.loaders.SkinLoader;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.assets.loaders.FileHandleResolver;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
+import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 
 /**
  * File:    JCGdxAssetManager
@@ -25,6 +34,7 @@ public class JCGdxAssetManager {
     // Textures
     public final String gameImages = "images/game.atlas";
 //    public final String loadingImages = "images/loading.atlas";
+    public final String explosionImages = "images/explosion.png";
 
     // Sounds
     public final String laserSound01 = "sounds/sfx_laser1.ogg";
@@ -42,6 +52,16 @@ public class JCGdxAssetManager {
     public final String skinJson = "skin/controls-clean-crispy.json";
     public final String skinAtlas = "skin/controls-clean-crispy.atlas";
 
+    // Fonts
+    public final String ttfRegFontFilename = "fonts/fontrg.ttf";
+//    public final String ttfRegFontSizeSmall = "regSmall.ttf";
+//    public final String ttfRegFontSizeMed = "regMed.ttf";
+//    public final String ttfRegFontSizeLarge = "regLarge.ttf";
+//    public final String otfEOTGRegFontFilename = "fonts/EdgeOfTheGalaxyRegular-OVEa6.otf";
+//    public final String fntEOTGReg72ptFontFilename = "fonts/EdgeOfTheGalaxyRegular_72pt.fnt";
+    public final String fontRegOpaque72 = "fontRegOpaque72.ttf";
+    public final String fontRegTransparent72 = "fontRegTransparent72.ttf";
+
     // Particle Effects
 //    public final String smokeEffect = "particles/smoke.pe";
 //    public final String waterEffect = "particles/water.pe";
@@ -49,6 +69,11 @@ public class JCGdxAssetManager {
 
     public void queueAddImages () {
         manager.load ( gameImages, TextureAtlas.class );
+    }
+
+    // TODO: use atlas for animations
+    public void queueAddExplosionImages() {
+        manager.load ( explosionImages, Texture.class );
     }
 
 //    public void queueAddLoadingImages () {
@@ -74,9 +99,60 @@ public class JCGdxAssetManager {
         manager.load ( skinJson, Skin.class, params );
     }
 
-    public void queueAddFonts () {
-        // TODO
+    public void queueAddFonts() {
+        FileHandleResolver resolver = new InternalFileHandleResolver ();
+        manager.setLoader ( FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader ( resolver ) );
+        manager.setLoader ( BitmapFont.class, ".ttf", new FreetypeFontLoader ( resolver ) );
+
+        FreetypeFontLoader.FreeTypeFontLoaderParameter regOpaqueFontParameter = new FreetypeFontLoader.FreeTypeFontLoaderParameter ();
+        regOpaqueFontParameter.fontFileName = ttfRegFontFilename;
+        regOpaqueFontParameter.fontParameters.size = 72;
+        regOpaqueFontParameter.fontParameters.borderWidth = 3.6f;
+        regOpaqueFontParameter.fontParameters.color = new Color ( 1, 1, 1, 1 );
+        regOpaqueFontParameter.fontParameters.borderColor = new Color ( 0, 0, 0, 1 );
+        manager.load ( fontRegOpaque72, BitmapFont.class, regOpaqueFontParameter );
+
+        FreetypeFontLoader.FreeTypeFontLoaderParameter regTransparentFontParameter = new FreetypeFontLoader.FreeTypeFontLoaderParameter ();
+        regTransparentFontParameter.fontFileName = ttfRegFontFilename;
+        regTransparentFontParameter.fontParameters.size = 72;
+        regTransparentFontParameter.fontParameters.borderWidth = 3.6f;
+        regTransparentFontParameter.fontParameters.color = new Color (1, 1, 1, 0.3f);
+        regTransparentFontParameter.fontParameters.borderColor = new Color ( 0, 0, 0, 0.3f );
+        manager.load ( fontRegTransparent72, BitmapFont.class, regTransparentFontParameter );
     }
+
+ /*   // Recipe pulled from https://github.com/libgdx/libgdx/blob/master/tests/gdx-tests/src/com/badlogic/gdx/tests/extensions/FreeTypeFontLoaderTest.java
+    public void queueAddFonts () {
+
+        // TODO: move all of the font generation to separate method
+        // set the loaders for the generator and the fonts themselves
+        FileHandleResolver resolver = new InternalFileHandleResolver ();
+        manager.setLoader ( FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader ( resolver ) );
+        manager.setLoader ( BitmapFont.class, ".ttf", new FreetypeFontLoader ( resolver ) );
+
+        // load to fonts via the generator (implicitely done by the FreetypefontLoader).
+        // Note: you MUST specify a FreetypeFontGenerator defining the ttf font file name and the size
+        // of the font to be generated. The names of the fonts are arbitrary and are not pointing
+        // to a file on disk (but must end with the font's file format '.ttf')!
+        FreetypeFontLoader.FreeTypeFontLoaderParameter size1Params = new FreetypeFontLoader.FreeTypeFontLoaderParameter ();
+        size1Params.fontFileName = ttfRegFontFilename;
+        size1Params.fontParameters.size = 16;
+        manager.load ( ttfRegFontSizeSmall, BitmapFont.class, size1Params );
+
+        FreetypeFontLoader.FreeTypeFontLoaderParameter size2Params = new FreetypeFontLoader.FreeTypeFontLoaderParameter ();
+        size2Params.fontFileName = ttfRegFontFilename;
+        size2Params.fontParameters.size = 24;
+        manager.load ( ttfRegFontSizeMed, BitmapFont.class, size2Params );
+
+        FreetypeFontLoader.FreeTypeFontLoaderParameter size3Params = new FreetypeFontLoader.FreeTypeFontLoaderParameter ();
+        size3Params.fontFileName = ttfRegFontFilename;
+        size3Params.fontParameters.size = 32;
+        manager.load ( ttfRegFontSizeLarge, BitmapFont.class, size3Params );
+
+        // Add Hiero generated fnt font EdgeOfTheGalaxy
+        manager.load ( fntEOTGReg72ptFontFilename, BitmapFont.class );
+
+    }*/
 
     public void queueAddParticleEffects () {
 

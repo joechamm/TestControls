@@ -9,9 +9,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.joechamm.gdxtests.controls.asset.JCGdxAssetManager;
 import com.joechamm.gdxtests.controls.audio.JCGdxAudioManager;
+import com.joechamm.gdxtests.controls.view.GameScreen;
 import com.joechamm.gdxtests.controls.view.LoadingScreen;
 import com.joechamm.gdxtests.controls.view.MenuScreen;
 import com.joechamm.gdxtests.controls.view.PreferencesScreen;
+
+import java.util.Random;
 
 public class JCGdxTestControls extends Game {
 
@@ -21,6 +24,7 @@ public class JCGdxTestControls extends Game {
 	private MenuScreen menuScreen;
 	private LoadingScreen loadingScreen;
 	private PreferencesScreen preferencesScreen;
+	private GameScreen gameScreen;
 
 	// game screen indice
 	public static final int MENU = 0;
@@ -36,6 +40,9 @@ public class JCGdxTestControls extends Game {
 
 	// audio manager
     public JCGdxAudioManager audioManager = null;
+
+	// TODO: move random to "GameLogic" type class
+	public static Random random = new Random ();
 
 	public void changeScreen(int screen) {
 		Gdx.app.debug ( TAG, "changeScreen" );
@@ -54,6 +61,8 @@ public class JCGdxTestControls extends Game {
 				break;
 			case APPLICATION:
 				Gdx.app.debug ( TAG, "APPLICATION" );
+				if(gameScreen == null) gameScreen = new GameScreen ( this );
+				this.setScreen ( gameScreen );
 				// TODO
 				break;
 			case CREDITS:
