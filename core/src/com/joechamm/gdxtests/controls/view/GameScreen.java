@@ -216,7 +216,6 @@ public class GameScreen implements Screen {
         // detect collisions between lasers and ships
         detectCollisions();
 
-
         // explosions
         updateAndRenderExplosions ( delta);
 
@@ -249,6 +248,9 @@ public class GameScreen implements Screen {
                                                 enemyShipTextureRegion, enemyShieldtextureRegion, enemyLaserTextureRegion));
 
             enemySpawnTimer -= timeBetweenEnemySpawns;
+
+            // play sound // TODO: need a better sound here
+            parent.audioManager.playShieldUpSound ();
         }
 
 
@@ -367,6 +369,8 @@ public class GameScreen implements Screen {
                                 new Explosion ( explosionTexture,
                                                 new Rectangle ( enemyShip.boundingBox ),
                                                 0.7f ) );
+                        // play explosion sound
+                        parent.audioManager.playFirstExplosionSound ();
                         score += 100;
                     }
                     laserListIterator.remove ();
@@ -390,6 +394,9 @@ public class GameScreen implements Screen {
 
                     playerShip.shield = 10;
                     playerShip.lives--;
+                    // play sound
+                    parent.audioManager.playFirstExplosionSound ();
+                    parent.audioManager.playTwoToneSound ();
                 }
                 laserListIterator.remove ();
             }
@@ -417,6 +424,8 @@ public class GameScreen implements Screen {
             for ( Laser laser : lasers ) {
                 playerLaserList.add ( laser );
             }
+            // play laser sound 1
+            parent.audioManager.playFirstLaserSound ();
         }
         // enemy lasers
         ListIterator<EnemyShip> enemyShipListIterator = enemyShipList.listIterator ();
@@ -427,6 +436,8 @@ public class GameScreen implements Screen {
                 for ( Laser laser : lasers ) {
                     enemyLaserList.add ( laser );
                 }
+                // play laser sound 2
+                parent.audioManager.playSecondLaserSound ();
             }
         }
 

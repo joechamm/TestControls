@@ -33,7 +33,8 @@ public class JCGdxAudioManager {
     public static final int SHIELD_DOWN_SNDIDX = 4;
     public static final int TWOTONE_SNDIDX = 5;
     public static final int ZAP_SNDIDX = 6;
-    public static final int SNDIDX_COUNT = 7;
+    public static final int EXPLOSION_01_SNDIDX = 7;
+    public static final int SNDIDX_COUNT = 8;
 
     // MUSIC INDEX
     public static final int ROLEPLAYING_MUSIDX = 0;
@@ -107,6 +108,7 @@ public class JCGdxAudioManager {
         Sound shieldDown = assetManager.manager.get ( assetManager.shieldDownSound, Sound.class );
         Sound twoTone = assetManager.manager.get ( assetManager.twoToneSound, Sound.class );
         Sound zap = assetManager.manager.get ( assetManager.zapSound, Sound.class );
+        Sound explosion01 = assetManager.manager.get ( assetManager.explosionSound01, Sound.class );
         sounds.set ( LASER_01_SNDIDX, laser01 );
         sounds.set ( LASER_02_SNDIDX, laser02 );
         sounds.set ( LOSE_SNDIDX, lose );
@@ -114,6 +116,7 @@ public class JCGdxAudioManager {
         sounds.set ( SHIELD_DOWN_SNDIDX, shieldDown );
         sounds.set ( TWOTONE_SNDIDX, twoTone );
         sounds.set ( ZAP_SNDIDX, zap );
+        sounds.set ( EXPLOSION_01_SNDIDX, explosion01 );
         soundInitialized = true;
         // if music has already been initialized, set initialized to true
         if ( musicInitialized ) {
@@ -285,6 +288,8 @@ public class JCGdxAudioManager {
                 return playSound ( sounds.get ( TWOTONE_SNDIDX ), soundEffectsVolume );
             case ZAP_SNDIDX:
                 return playSound ( sounds.get ( ZAP_SNDIDX ), soundEffectsVolume );
+            case EXPLOSION_01_SNDIDX:
+                return playSound ( sounds.get ( EXPLOSION_01_SNDIDX ), soundEffectsVolume );
             default:
                 Gdx.app.error ( TAG, "Invalid sound effect id: " + soundEffectIdx );
                 return - 1;
@@ -314,6 +319,10 @@ public class JCGdxAudioManager {
 
     public long playZapSound () {
         return playSoundEffect ( ZAP_SNDIDX );
+    }
+
+    public long playFirstExplosionSound() {
+        return playSoundEffect ( EXPLOSION_01_SNDIDX );
     }
 
     public void dispose () {

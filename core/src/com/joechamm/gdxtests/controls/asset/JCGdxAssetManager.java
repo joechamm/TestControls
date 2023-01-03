@@ -44,6 +44,7 @@ public class JCGdxAssetManager {
     public final String shieldUpSound = "sounds/sfx_shieldUp.ogg";
     public final String twoToneSound = "sounds/sfx_twoTone.ogg";
     public final String zapSound = "sounds/sfx_zap.ogg";
+    public final String explosionSound01 = "sounds/sfx_explosion1.ogg";
 
     // Music
     public final String playingSong = "music/music_rolemusic.mp3";
@@ -88,6 +89,7 @@ public class JCGdxAssetManager {
         manager.load ( shieldDownSound, Sound.class );
         manager.load ( twoToneSound, Sound.class );
         manager.load ( zapSound, Sound.class );
+        manager.load ( explosionSound01, Sound.class );
     }
 
     public void queueAddMusic () {
