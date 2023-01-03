@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -47,15 +48,160 @@ public class PreferencesScreen implements Screen {
         Gdx.app.debug ( TAG, "ctor" );
         parent = jcGdxTestControls;
 
-        stage = new Stage (new ScreenViewport ());
-
+        stage = new Stage ( new ScreenViewport () );
     }
 
     @Override
     public void show () {
 
+  //      stage = new Stage ( new ScreenViewport () );
+        Gdx.app.debug ( TAG, "show" );
+
+        stage.clear ();
+        Gdx.input.setInputProcessor ( stage );
+        stage.setDebugAll ( true );
+
         skin = parent.assetManager.manager.get ( parent.assetManager.skinJson );
 
+        Table table = new Table();
+        table.setFillParent(true);
+
+        Stack stack = new Stack();
+
+        Image image = new Image(skin, "Starscape00");
+  //      image.setTouchable(disabled);
+        image.setScaling(Scaling.fill);
+        stack.addActor(image);
+
+        Table table1 = new Table();
+        table1.setName("prefBaseTable");
+   //     table1.setTouchable(disabled);
+        table1.pad(5.0f);
+
+        Label label = new Label("PREFERENCES", skin);
+        label.setName("prefSceneLabel");
+        label.setAlignment(Align.center);
+        label.setColor(skin.getColor("CYAN"));
+        table1.add(label).pad(5.0f).fill(true).uniform().colspan(3);
+
+        table1.row();
+        Table table2 = new Table();
+        table2.setName("prefSliderTable");
+ //       table2.setTouchable(enabled);
+
+        label = new Label("Volume", skin);
+        label.setAlignment(Align.center);
+        table2.add(label).pad(5.0f).align(Align.top).colspan(3);
+
+        table2.row();
+        label = new Label("Sound Effects", skin);
+        label.setAlignment(Align.center);
+        table2.add(label).pad(5.0f).spaceRight(5.0f).align(Align.right);
+
+        final Slider volumeSoundSlider = new Slider(0.0f, 1.0f, 0.1f, false, skin, "default-horizontal");
+        volumeSoundSlider.setName("volumeSoundSlider");
+        table2.add(volumeSoundSlider).pad(5.0f).colspan(2);
+
+        table2.row();
+        label = new Label("Music", skin);
+        table2.add(label).pad(5.0f).spaceRight(5.0f).align(Align.right);
+
+        final Slider volumeMusicSlider = new Slider(0.0f, 1.0f, 0.1f, false, skin, "default-horizontal");
+        volumeMusicSlider.setName("volumeMusicSlider");
+        table2.add(volumeMusicSlider).pad(5.0f).colspan(2);
+        table1.add(table2).pad(5.0f).fill(true).uniform();
+
+        table1.row();
+        table2 = new Table();
+        table2.setName("prefCheckboxTable");
+ //       table2.setTouchable(enabled);
+
+        label = new Label("Enable", skin);
+        label.setName("enabledLabel");
+        table2.add(label).pad(5.0f).uniform().colspan(2);
+
+        table2.row();
+        final CheckBox soundCheckBox = new CheckBox(" Sound Effects", skin);
+        soundCheckBox.setName("soundCheckbox");
+   //     soundCheckBox.setChecked(true);
+        soundCheckBox.setColor(skin.getColor("WHITE"));
+        table2.add(soundCheckBox).pad(5.0f).uniform();
+
+        final CheckBox musicCheckbox = new CheckBox(" Music", skin);
+        musicCheckbox.setName("musicCheckbox");
+  //      musicCheckbox.setChecked(true);
+        table2.add(musicCheckbox).pad(5.0f).uniform();
+        table1.add(table2).pad(5.0f).fill(true).uniform();
+
+        table1.row();
+        Container container = new Container();
+        container.setName("backButtonContainer");
+
+        final TextButton backButton = new TextButton("Back", skin);
+        backButton.setName("backTextButton");
+        container.setActor(backButton);
+        table1.add(container).pad(5.0f).fill(true).uniform();
+        stack.addActor(table1);
+        table.add(stack);
+        stage.addActor(table);
+
+        // set values and add listeners
+        volumeSoundSlider.setValue ( parent.getPreferences ().getSoundVolume () );
+        volumeSoundSlider.addListener ( new EventListener () {
+            @Override
+            public boolean handle ( Event event ) {
+                Gdx.app.debug ( TAG, "volumeSoundSlider handle event" );
+                parent.getPreferences ().setSoundVolume ( volumeSoundSlider.getValue () );
+                parent.audioManager.updateSoundVolume ();
+                return false;
+            }
+        } );
+
+        volumeMusicSlider.setValue ( parent.getPreferences ().getMusicVolume () );
+        volumeMusicSlider.addListener ( new EventListener () {
+            @Override
+            public boolean handle ( Event event ) {
+                Gdx.app.debug ( TAG, "volumeMusicSlider handle event" );
+                parent.getPreferences ().setMusicVolume ( volumeMusicSlider.getValue () );
+                parent.audioManager.updateMusicVolume ();
+                return false;
+            }
+        } );
+
+        soundCheckBox.setChecked ( parent.getPreferences ().isSoundEffectsEnabled () );
+        soundCheckBox.addListener ( new EventListener () {
+            @Override
+            public boolean handle ( Event event ) {
+                Gdx.app.debug ( TAG, "soundCheckBox handle event" );
+                boolean enabled = soundCheckBox.isChecked ();
+                parent.getPreferences ().setSoundEffectsEnabled ( enabled );
+                parent.audioManager.updateSoundEffectsOn ();
+                return false;
+            }
+        } );
+
+        musicCheckbox.setChecked ( parent.getPreferences ().isMusicEnabled () );
+        musicCheckbox.addListener ( new EventListener () {
+            @Override
+            public boolean handle ( Event event ) {
+                Gdx.app.debug ( TAG, "musicCheckbox handle event" );
+                boolean enabled = musicCheckbox.isChecked ();
+                parent.getPreferences ().setMusicEnabled ( enabled );
+                parent.audioManager.updateMusicOn ();
+                return false;
+            }
+        } );
+
+        backButton.addListener ( new ChangeListener () {
+            @Override
+            public void changed ( ChangeEvent event, Actor actor ) {
+                Gdx.app.debug ( TAG, "backButton handle event" );
+                parent.changeScreen ( JCGdxTestControls.MENU );
+            }
+        } );
+
+
+/*
         Table table = new Table();
         table.setFillParent(true);
 
@@ -165,7 +311,7 @@ public class PreferencesScreen implements Screen {
             public void changed ( ChangeEvent event, Actor actor ) {
                 parent.changeScreen ( JCGdxTestControls.MENU );
             }
-        } );
+        } );*/
     }
 
     @Override
@@ -174,7 +320,8 @@ public class PreferencesScreen implements Screen {
         Gdx.gl.glClearColor ( 0, 0, 0, 1 );
         Gdx.gl.glClear ( GL20.GL_COLOR_BUFFER_BIT );
 
-        stage.act (delta);
+//        stage.act (delta);
+        stage.act ( Math.min ( Gdx.graphics.getDeltaTime (), 1 / 30f ) );
         stage.draw ();
 
     }

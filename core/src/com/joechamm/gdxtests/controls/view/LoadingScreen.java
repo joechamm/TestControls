@@ -9,6 +9,8 @@ package com.joechamm.gdxtests.controls.view;
  * Created  1/1/2023 at 5:10 PM
  */
 
+import static com.badlogic.gdx.scenes.scene2d.Touchable.disabled;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.Screen;
@@ -20,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
@@ -39,7 +42,7 @@ public class LoadingScreen implements Screen {
 
     private Stage stage;
     private Skin skin;
-//    private ProgressBar progressBar;
+    private ProgressBar progressBar;
     private Label countDownLabel;
 
     // loading stages
@@ -50,7 +53,7 @@ public class LoadingScreen implements Screen {
     public final int LOAD_MUSIC = 4;
     public final int LOAD_FINISHED = 5;
 
-    private int currentLoadingStage = 0;
+    private int currentLoadingStage = LOAD_IMAGES;
 
     public float countDown = 5f;
 
@@ -82,6 +85,43 @@ public class LoadingScreen implements Screen {
 
         Gdx.app.debug ( TAG, "show" );
 
+        Table table = new Table();
+        table.setFillParent(true);
+
+        Stack stack = new Stack();
+
+        Image image = new Image(skin, "Starscape00-tiled");
+        image.setTouchable(disabled);
+        image.setScaling(Scaling.fill);
+        stack.addActor(image);
+
+        Table table1 = new Table();
+        table1.setTouchable(disabled);
+        table1.pad(10.0f);
+        table1.align(Align.top);
+
+        image = new Image(skin, "title");
+        image.setName("titleImage");
+        image.setTouchable(disabled);
+        image.setScaling(Scaling.fit);
+        table1.add(image).padLeft(20.0f).padRight(20.0f).padTop(40.0f).padBottom(10.0f).grow().uniform();
+
+        table1.row();
+        progressBar = new ProgressBar(0.0f, 100.0f, 1.0f, false, skin, "tiled-big");
+        progressBar.setName("loadingProgressBar");
+        table1.add(progressBar).pad(40.0f).growY().uniform();
+
+        table1.row ();
+        countDownLabel = new Label ( "loading images...", skin );
+        countDownLabel.setName ( "countDownLabel" );
+        table1.add (countDownLabel).pad ( 40.0f ).growY ().uniform ();
+
+        stack.addActor(table1);
+        table.add(stack);
+        stage.addActor(table);
+
+
+/*
         Table table = new Table ( skin );
         table.setFillParent ( true );
         table.setDebug ( true );
@@ -108,7 +148,7 @@ public class LoadingScreen implements Screen {
 
         stage.addActor ( table );
 
-//        progressBar.setValue ( 1.0f );
+//        progressBar.setValue ( 1.0f );*/
     }
 
     @Override
@@ -120,7 +160,9 @@ public class LoadingScreen implements Screen {
         if ( parent.assetManager.manager.update () ) {
             currentLoadingStage++;
 
-//            progressBar.setValue ( (float)currentLoadingStage );
+            float progBarValue = ((float)currentLoadingStage / (float)LOAD_FINISHED) * 100.0f;
+
+            progressBar.setValue ( progBarValue );
 
             switch ( currentLoadingStage ) {
                 case LOAD_FONTS:
@@ -136,12 +178,25 @@ public class LoadingScreen implements Screen {
                 case LOAD_SOUNDS:
                     Gdx.app.debug ( TAG, "Loading sounds..." );
                     countDownLabel.setText ( "loading sounds..." );
-                    parent.assetManager.queueAddSounds ();
+//                    parent.assetManager.queueAddSounds ();
+                    if ( parent.audioManager.initSoundEffects () ) {
+                        Gdx.app.debug ( TAG, "sound effects initialized" );
+                    } else {
+                        Gdx.app.error ( TAG, "OH NO! Something went wrong loading sounds." );
+                        Gdx.app.exit ();
+                    }
                     break;
                 case LOAD_MUSIC:
                     Gdx.app.debug ( TAG, "Loading music..." );
                     countDownLabel.setText ( "loading music..." );
-                    parent.assetManager.queueAddMusic ();
+//                    parent.assetManager.queueAddMusic ();
+                    if ( parent.audioManager.initMusic () ) {
+                        Gdx.app.debug ( TAG, "music initialized" );
+                        parent.audioManager.startPlayingSong ();
+                    } else {
+                        Gdx.app.error ( TAG, "OH NO! Something went wrong loading music." );
+                        Gdx.app.exit ();
+                    }
                     break;
                 case LOAD_FINISHED:
                     Gdx.app.debug ( TAG, "Finished loading..." );
@@ -162,7 +217,8 @@ public class LoadingScreen implements Screen {
             }
         }
 
-        stage.act (delta);
+  //      stage.act (delta);
+        stage.act ( Math.min ( Gdx.graphics.getDeltaTime (), 1 / 30f ) );
         stage.draw ();
     }
 

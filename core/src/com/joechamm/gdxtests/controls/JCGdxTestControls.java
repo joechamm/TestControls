@@ -3,6 +3,7 @@ package com.joechamm.gdxtests.controls;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -65,13 +66,27 @@ public class JCGdxTestControls extends Game {
 	@Override
 	public void create () {
 		Gdx.app.setLogLevel ( Application.LOG_DEBUG );
-		Gdx.graphics.setWindowedMode ( 1920, 1080 );
+
+		switch ( Gdx.app.getType () ) {
+			case Android:
+				break;
+			case Desktop:
+				Gdx.graphics.setWindowedMode ( 510, 960 );
+				break;
+			default:
+				break;
+		}
+
+	//	Gdx.graphics.setWindowedMode ( 1020, 1920 );
 
 		Gdx.app.debug ( TAG, "create" );
 
 		preferences = new AppPreferences ();
 		audioManager = JCGdxAudioManager.getInstance ( this );
-		audioManager.initPrefs ();
+		if(! audioManager.initPrefs ()) {
+			Gdx.app.error ( TAG, "OH NO! failed to initialize audio preferences." );
+			Gdx.app.exit ();
+		}
 
 		loadingScreen = new LoadingScreen ( this );
 		setScreen ( loadingScreen );

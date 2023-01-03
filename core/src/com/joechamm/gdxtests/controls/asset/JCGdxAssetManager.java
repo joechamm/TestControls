@@ -23,7 +23,7 @@ public class JCGdxAssetManager {
     public final AssetManager manager = new AssetManager ();
 
     // Textures
-    public final String gameImages = "images/images.atlas";
+    public final String gameImages = "images/game.atlas";
 //    public final String loadingImages = "images/loading.atlas";
 
     // Sounds
@@ -39,8 +39,8 @@ public class JCGdxAssetManager {
     public final String playingSong = "music/music_rolemusic.mp3";
 
     // Skin
-    public final String skinJson = "skin/laser-planes-ui.json";
-    public final String skinAtlas = "skin/laser-planes-ui.atlas";
+    public final String skinJson = "skin/controls-clean-crispy.json";
+    public final String skinAtlas = "skin/controls-clean-crispy.atlas";
 
     // Particle Effects
 //    public final String smokeEffect = "particles/smoke.pe";

@@ -9,6 +9,8 @@ package com.joechamm.gdxtests.controls.view;
  * Created  1/1/2023 at 1:21 PM
  */
 
+import static com.badlogic.gdx.scenes.scene2d.Touchable.disabled;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Game;
@@ -39,14 +41,101 @@ public class MenuScreen implements Screen {
 
     public MenuScreen( JCGdxTestControls jcGdxTestControls ) {
         parent = jcGdxTestControls;
+
+        stage = new Stage ( new ScreenViewport () );
+
+        skin = parent.assetManager.manager.get ( parent.assetManager.skinJson );
     }
 
     @Override
     public void show () {
 
-        stage = new Stage (new ScreenViewport ());
-        skin = new Skin ( Gdx.files.internal ( "skin/laser-planes-ui.json" ) );
+    //    stage = new Stage (new ScreenViewport ());
+        Gdx.app.debug ( TAG, "show" );
+
+        stage.clear ();
         Gdx.input.setInputProcessor ( stage );
+        stage.setDebugAll ( true );
+
+  //      skin = parent.assetManager.manager.get ( parent.assetManager.skinJson );
+
+        // create buttons and add change listeners
+        final TextButton newGameButton = new TextButton("New Game", skin);
+        newGameButton.setName("menuNewGameButton");
+        newGameButton.addListener ( new ChangeListener () {
+            @Override
+            public void changed ( ChangeEvent event, Actor actor ) {
+                Gdx.app.debug ( TAG, "New Game Pressed..." );
+                // TODO: implement
+                parent.changeScreen ( JCGdxTestControls.APPLICATION );
+            }
+        } );
+
+        final TextButton preferencesButton = new TextButton("Preferences", skin);
+        preferencesButton.setName("menuPreferencesButton");
+        preferencesButton.addListener ( new ChangeListener () {
+            @Override
+            public void changed ( ChangeEvent event, Actor actor ) {
+                Gdx.app.debug ( TAG, "Preferences Pressed..." );
+                parent.changeScreen ( JCGdxTestControls.PREFERENCES );
+                // TODO: implement
+            }
+        } );
+
+        final TextButton exitButton = new TextButton("Exit", skin);
+        exitButton.setName("menuExitButton");
+        exitButton.addListener ( new ChangeListener () {
+            @Override
+            public void changed ( ChangeEvent event, Actor actor ) {
+                Gdx.app.debug ( TAG, "Exit Pressed..." );
+                Gdx.app.exit ();
+                // TODO: implement
+            }
+        } );
+
+        Table table = new Table();
+        table.setFillParent(true);
+
+        Stack stack = new Stack();
+
+        Image image = new Image(skin, "Starscape00");
+  //      image.setTouchable(disabled);
+        image.setScaling(Scaling.fill);
+        stack.addActor(image);
+
+        Table table1 = new Table();
+        table1.setName("menuBaseTable");
+  //      table1.setTouchable(disabled);
+        table1.pad(5.0f);
+
+        image = new Image(skin, "title");
+        image.setName("menuTitleImage");
+        image.setScaling(Scaling.fit);
+        table1.add(image).pad(20.0f).spaceBottom(30.0f).fill(true).align(Align.top).uniformX();
+
+        table1.row();
+        Table table2 = new Table();
+        table2.setName("menuTable");
+        table2.pad(10.0f);
+
+
+        table2.add(newGameButton).pad(5.0f).fillX().uniformX();
+
+        table2.row();
+
+        table2.add(preferencesButton).pad(5.0f).fillX().uniformX();
+
+        table2.row();
+
+        table2.add(exitButton).pad(5.0f).fillX().uniformX();
+        table1.add(table2).fill(true).uniformX();
+        stack.addActor(table1);
+        table.add(stack);
+        stage.addActor(table);
+
+
+
+        /*
 
         Table table = new Table();
         table.setFillParent(true);
@@ -131,7 +220,7 @@ public class MenuScreen implements Screen {
                 Gdx.app.exit ();
                 // TODO: implement
             }
-        } );
+        } );*/
 
     }
 
@@ -140,12 +229,15 @@ public class MenuScreen implements Screen {
 
         Gdx.gl.glClearColor ( 0, 0, 0, 1 );
         Gdx.gl.glClear ( GL20.GL_COLOR_BUFFER_BIT );
-        stage.act (Gdx.graphics.getDeltaTime ());
+
+   //     stage.act (delta);
+        stage.act ( Math.min ( Gdx.graphics.getDeltaTime (), 1 / 30f ) );
         stage.draw ();
     }
 
     @Override
     public void resize ( int width, int height ) {
+        Gdx.app.debug ( TAG, "resize dimensions: " + width + "x" + height );
         stage.getViewport ().update ( width, height, true );
 
     }
@@ -153,25 +245,27 @@ public class MenuScreen implements Screen {
     /** @see ApplicationListener#pause() */
     @Override
     public void pause () {
+        Gdx.app.debug ( TAG, "pause" );
 
     }
 
     /** @see ApplicationListener#resume() */
     @Override
     public void resume () {
+        Gdx.app.debug ( TAG, "resume" );
 
     }
 
     /** Called when this screen is no longer the current screen for a {@link Game}. */
     @Override
     public void hide () {
+        Gdx.app.debug ( TAG, "hide" );
 
     }
 
     @Override
     public void dispose () {
+        Gdx.app.debug ( TAG, "dispose" );
         stage.dispose ();
-        skin.dispose ();
     }
-
 }
