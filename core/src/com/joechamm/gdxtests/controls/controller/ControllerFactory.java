@@ -1,5 +1,6 @@
 package com.joechamm.gdxtests.controls.controller;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 /**
  * File:    ControllerFactory
@@ -14,6 +15,9 @@ public class ControllerFactory {
     public static final String TAG = ControllerFactory.class.getName ();
 
     public static KeyboardController<GameControls> buildKeyboardController() {
+
+        Gdx.app.debug ( TAG, "buildKeyboardController" );
+
         final ButtonMapper<GameControls> buttonMapper = new ButtonMapper<> ();
         buttonMapper.setMapping ( GameControls.BUTTON_DPAD_UP, Input.Keys.UP);
         buttonMapper.setMapping ( GameControls.BUTTON_DPAD_DOWN, Input.Keys.DOWN );
@@ -40,6 +44,8 @@ public class ControllerFactory {
     }
 
     public static LogitechController<GameControls> buildLogitechController() {
+        Gdx.app.debug ( TAG, "buildLogitechController" );
+
         final ButtonMapper<GameControls> buttonMapper = new ButtonMapper<> ();
 
         buttonMapper.setMapping ( GameControls.BUTTON_DPAD_UP, 11);
@@ -73,6 +79,8 @@ public class ControllerFactory {
     }
 
     public static MultiplexedController<GameControls> buildMultiplexedController() {
+        Gdx.app.debug ( TAG, "buildMultiplexedController" );
+
         return new MultiplexedController<> ( buildKeyboardController (), buildLogitechController () );
     }
 }

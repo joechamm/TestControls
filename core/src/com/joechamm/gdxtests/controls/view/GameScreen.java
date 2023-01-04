@@ -31,6 +31,9 @@ import com.joechamm.gdxtests.controls.Explosion;
 import com.joechamm.gdxtests.controls.JCGdxTestControls;
 import com.joechamm.gdxtests.controls.Laser;
 import com.joechamm.gdxtests.controls.PlayerShip;
+import com.joechamm.gdxtests.controls.controller.Controller;
+import com.joechamm.gdxtests.controls.controller.ControllerFactory;
+import com.joechamm.gdxtests.controls.controller.GameControls;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -42,6 +45,9 @@ public class GameScreen implements Screen {
 
     // orchestrator
     private JCGdxTestControls parent;
+
+    // controller
+    private Controller controllerPlayer1;
 
     // screen
     private Camera camera;
@@ -91,6 +97,12 @@ public class GameScreen implements Screen {
 
         camera = new OrthographicCamera ();
         viewport = new StretchViewport ( WORLD_WIDTH, WORLD_HEIGHT, camera );
+
+        if ( parent.getPreferences ().isGamepadEnabled () ) {
+            controllerPlayer1 = ControllerFactory.buildLogitechController ();
+        } else {
+            controllerPlayer1 = ControllerFactory.buildKeyboardController ();
+        }
 
         // setup texture atlas
  //       atlas = new TextureAtlas ( "images.atlas" );
@@ -283,6 +295,7 @@ public class GameScreen implements Screen {
         enemyShip.translate ( xMove, yMove );
     }
 
+/*
     private void detectInput ( float delta ) {
         // keyboard input
 
@@ -307,6 +320,76 @@ public class GameScreen implements Screen {
         }
         if ( Gdx.input.isKeyPressed ( Input.Keys.DOWN ) && downLimit < 0) {
             playerShip.translate (0f,  Math.max ( - playerShip.movementSpeed * delta, leftLimit ));
+        }
+
+        // touch input (also mouse)
+        if ( Gdx.input.isTouched () ) {
+            // get the screen position of the touch
+            float xTouchPixels = Gdx.input.getX ();
+            float yTouchPixels = Gdx.input.getY ();
+
+            // convert to world position
+            Vector2 touchPoint = new Vector2 ( xTouchPixels, yTouchPixels );
+            touchPoint = viewport.unproject ( touchPoint );
+
+            // calculate the x and y differences
+            Vector2 playerShipCenter = new Vector2 ( playerShip.boundingBox.x + playerShip.boundingBox.width / 2,
+                                                     playerShip.boundingBox.y + playerShip.boundingBox.height / 2 );
+
+            float touchDistance = touchPoint.dst ( playerShipCenter );
+
+            if ( touchDistance > TOUCH_MOVEMENT_THRESHOLD ) {
+                float xTouchDifference = touchPoint.x - playerShipCenter.x;
+                float yTouchDifference = touchPoint.y - playerShipCenter.y;
+
+                // scale to the maximum speed of the ship
+                float xMove = (xTouchDifference / touchDistance) * playerShip.movementSpeed * delta;
+                float yMove = (yTouchDifference / touchDistance) * playerShip.movementSpeed * delta;
+
+                if ( xMove > 0 ) {
+                    xMove = Math.min ( xMove, rightLimit );
+                } else {
+                    xMove = Math.max ( xMove, leftLimit );
+                }
+
+                if ( yMove > 0 ) {
+                    yMove = Math.min ( yMove, upLimit );
+                } else {
+                    yMove = Math.max ( yMove, downLimit );
+                }
+
+                playerShip.translate ( xMove, yMove );
+            }
+        }
+    }
+*/
+
+    private void detectInput(float delta) {
+        // keyboard input
+
+        // strategy: determine the max distance the ship can move
+        // check each key that matters and move accordingly
+
+        float leftLimit, rightLimit, upLimit, downLimit;
+        leftLimit = - playerShip.boundingBox.x;
+        downLimit = - playerShip.boundingBox.y;
+        rightLimit = WORLD_WIDTH - playerShip.boundingBox.x - playerShip.boundingBox.width;
+        upLimit = (float)WORLD_HEIGHT / 2 - playerShip.boundingBox.y - playerShip.boundingBox.height;
+
+        if(controllerPlayer1.isPressed ( GameControls.BUTTON_DPAD_RIGHT ) && rightLimit > 0) {
+            playerShip.translate ( Math.min ( playerShip.movementSpeed * delta, rightLimit ), 0f );
+        }
+
+        if(controllerPlayer1.isPressed ( GameControls.BUTTON_DPAD_UP ) && upLimit > 0) {
+            playerShip.translate ( 0f, Math.min ( playerShip.movementSpeed * delta, upLimit ) );
+        }
+
+        if(controllerPlayer1.isPressed ( GameControls.BUTTON_DPAD_LEFT ) && leftLimit < 0) {
+            playerShip.translate ( Math.max ( - playerShip.movementSpeed * delta, leftLimit ), 0f );
+        }
+
+        if(controllerPlayer1.isPressed ( GameControls.BUTTON_DPAD_DOWN ) && downLimit < 0) {
+            playerShip.translate ( 0f, Math.max ( - playerShip.movementSpeed * delta, downLimit ) );
         }
 
         // touch input (also mouse)
