@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -34,6 +35,8 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.joechamm.gdxtests.controls.JCGdxTestControls;
+
+import java.awt.Checkbox;
 
 public class PreferencesScreen implements Screen {
 
@@ -132,8 +135,57 @@ public class PreferencesScreen implements Screen {
   //      musicCheckbox.setChecked(true);
         table2.add(musicCheckbox).pad(5.0f).uniform();
         table1.add(table2).pad(5.0f).fill(true).uniform();
-
         table1.row();
+
+        // Add the game controls method table
+        table2 = new Table ();
+        table2.setName ( "prefRadioButtonTable" );
+
+        label = new Label ( "Controls Method", skin );
+        label.setName ( "controlsMethodLabel" );
+        table2.add (label).pad ( 5.0f ).uniform ().align ( Align.top );
+
+        table2.row ();
+
+        // setup our radio buttons
+        final CheckBox radioCheckboxControlsMethodTouch = new CheckBox ( "Touch", skin, "radio" );
+        radioCheckboxControlsMethodTouch.setChecked ( true );
+        radioCheckboxControlsMethodTouch.addListener ( new EventListener () {
+            @Override
+            public boolean handle ( Event event ) {
+                Gdx.app.debug ( TAG, "radioCheckboxControlsMethodTouch handle event" );
+                if ( radioCheckboxControlsMethodTouch.isChecked () ) {
+                    parent.getPreferences ().setControlsMethodTouch ();
+                }
+                return false;
+            }
+        } );
+
+        final CheckBox radioCheckboxControlsMethodGamepad = new CheckBox ( "Gamepad", skin, "radio" );
+        radioCheckboxControlsMethodGamepad.setChecked ( false );
+        radioCheckboxControlsMethodGamepad.addListener ( new EventListener () {
+            @Override
+            public boolean handle ( Event event ) {
+                Gdx.app.debug ( TAG, "radioCheckboxControlsMethodGamepad handle event" );
+                if ( radioCheckboxControlsMethodGamepad.isChecked () ) {
+                    parent.getPreferences ().setControlsMethodGamepad ();
+                }
+                return false;
+            }
+        } );
+
+        final ButtonGroup<CheckBox> controlsMethodButtonGroup = new ButtonGroup<>();
+        controlsMethodButtonGroup.add ( radioCheckboxControlsMethodTouch );
+        controlsMethodButtonGroup.add ( radioCheckboxControlsMethodGamepad );
+        controlsMethodButtonGroup.setMinCheckCount ( 1 );
+        controlsMethodButtonGroup.setMaxCheckCount ( 1 );
+
+        table2.add ( radioCheckboxControlsMethodTouch ).pad ( 5.0f ).uniform ().align ( Align.left );
+        table2.add ( radioCheckboxControlsMethodGamepad ).pad ( 5.0f ).uniform ().align ( Align.right );
+
+        table1.add(table2).pad(5.0f).fill(true).uniform();
+        table1.row();
+
         Container container = new Container();
         container.setName("backButtonContainer");
 
