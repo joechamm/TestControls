@@ -347,10 +347,7 @@ public class GameScreen implements Screen {
 
                 playerShip.translate ( xMove, yMove );
             }
-
         }
-
-
     }
 
     private void detectCollisions () {
