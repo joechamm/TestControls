@@ -1,5 +1,6 @@
 package com.joechamm.gdxtests.controls.controller;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.TimeUtils;
 
@@ -13,6 +14,8 @@ import com.badlogic.gdx.utils.TimeUtils;
  */
 public abstract class Controller<V extends Controls> {
 
+    public static final String TAG = Controller.class.getName ();
+
     private ObjectMap<V, Long> lastPressed = new ObjectMap<> ();
 
     protected ButtonMapper<V> buttonMapper;
@@ -24,10 +27,12 @@ public abstract class Controller<V extends Controls> {
     public abstract float getAxis(V control);
 
     public long when(V control) {
+        Gdx.app.debug ( TAG, "when ( control: " + control.toString () + " )" );
         return lastPressed.get ( control, 0L );
     }
 
     public void record(V control) {
+        Gdx.app.debug ( TAG, "record ( control: " + control.toString () + " )" );
         lastPressed.put ( control, TimeUtils.millis () );
     }
 }

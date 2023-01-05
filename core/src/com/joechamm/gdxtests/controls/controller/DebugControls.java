@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerMapping;
 import com.badlogic.gdx.controllers.Controllers;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.StringBuilder;
 import com.joechamm.gdxtests.controls.JCGdxTestControls;
 
@@ -60,78 +61,81 @@ public class DebugControls {
         Gdx.app.log ( TAG, "Gyroscope: " + (isGyroscopeAvailable ? "AVAILABLE" : "NOT AVAILABLE") );
         Gdx.app.log ( TAG, "RotationVector: " + (isRotationVectorAvailable ? "AVAILABLE" : "NOT AVAILABLE") );
         Gdx.app.log ( TAG, "Pressure: " + (isPressureAvailable ? "AVAILABLE" : "NOT AVAILABLE") );
+    }
 
+    public static void logIndexedGameController(int idx) {
+        if( 0 > idx ||
+                Controllers.getControllers ().size <= idx) {
+            Gdx.app.error ( TAG, "Invalid game controller index. Cannot log." );
+            return;
+        }
+
+        Controller indexedGameController = Controllers.getControllers ().get ( idx );
+        StringBuilder stringBuilder = new StringBuilder ();
+        ControllerMapping mapping = indexedGameController.getMapping ();
+        stringBuilder.append ( "Controller at index " )
+                     .append ( idx )
+                     .appendLine ( " found!" )
+                     .append ( "  Name: " )
+                     .appendLine ( indexedGameController.getName () )
+                     .append ( "  Unique Id: " )
+                     .appendLine ( indexedGameController.getUniqueId () )
+                     .append ( "  Player Index: " )
+                     .appendLine ( ( indexedGameController.supportsPlayerIndex () ? String.valueOf ( indexedGameController.getPlayerIndex () ) : "N/A" ) )
+                     .append ( "  Axis Count: " )
+                     .appendLine ( String.valueOf ( indexedGameController.getAxisCount () ) )
+                     .append ( "  Button Range: " )
+                     .append ( String.valueOf ( indexedGameController.getMinButtonIndex () ) )
+                     .append ( " to " )
+                     .appendLine ( String.valueOf ( indexedGameController.getMaxButtonIndex () ) )
+                     .appendLine ( "  Mapping:" )
+                     .append ( "    A: " )
+                     .append ( String.valueOf ( mapping.buttonA ) )
+                     .append ( ", B: " )
+                     .append ( String.valueOf ( mapping.buttonB ) )
+                     .append ( ", X: " )
+                     .append ( String.valueOf ( mapping.buttonX ) )
+                     .append ( ", Y :" )
+                     .appendLine ( String.valueOf ( mapping.buttonY ) )
+                     .append ( "    D-Pad UP: " )
+                     .append ( String.valueOf ( mapping.buttonDpadUp ))
+                     .append ( ", D-Pad DOWN: " )
+                     .append ( String.valueOf ( mapping.buttonDpadDown ))
+                     .append ( ", D-Pad RIGHT: " )
+                     .append ( String.valueOf ( mapping.buttonDpadRight ))
+                     .append ( ", D-Pad LEFT: " )
+                     .appendLine ( String.valueOf ( mapping.buttonDpadLeft ))
+                     .append ( "    L1: " )
+                     .append ( String.valueOf ( mapping.buttonL1 ))
+                     .append ( ", L2: " )
+                     .append ( String.valueOf ( mapping.buttonL2 ))
+                     .append ( ", R1: " )
+                     .append ( String.valueOf ( mapping.buttonR1 ))
+                     .append ( ", R2: " )
+                     .appendLine ( String.valueOf ( mapping.buttonR2 ))
+                     .append ( "    Left-Stick Button: " )
+                     .append ( String.valueOf ( mapping.buttonLeftStick ))
+                     .append ( ", Right-Stick Button: " )
+                     .append ( String.valueOf ( mapping.buttonRightStick ))
+                     .append ( ", Back Button: " )
+                     .append ( String.valueOf ( mapping.buttonBack ))
+                     .append ( ", Start Button: " )
+                     .appendLine ( String.valueOf ( mapping.buttonStart ))
+                     .append ( "    Axis-Left X: " )
+                     .append ( String.valueOf ( mapping.axisLeftX ))
+                     .append ( ", Axis-Left Y: " )
+                     .appendLine ( String.valueOf ( mapping.axisLeftY ) )
+                     .append ( "    Axis-Right X: " )
+                     .append ( String.valueOf ( mapping.axisRightX ))
+                     .append ( ", Axis-Right Y: " )
+                     .appendLine ( String.valueOf ( mapping.axisRightY ) );
+
+        Gdx.app.log ( TAG, stringBuilder.toStringAndClear () );
     }
 
     public static void logAvailableControllers() {
-        int idx = 0;
-        StringBuilder stringBuilder = new StringBuilder ();
-        for( Controller  controller : Controllers.getControllers ()) {
-            String name = controller.getName ();
-            String uniqueId = controller.getUniqueId ();
-            boolean supportsPlayerIdx = controller.supportsPlayerIndex ();
-            int axisCount = controller.getAxisCount ();
-            int maxButtonIndex = controller.getMaxButtonIndex ();
-            int minButtonIndex = controller.getMinButtonIndex ();
-            ControllerMapping mapping = controller.getMapping ();
-            stringBuilder.append ( "Controller at index " )
-                   .append ( idx++ )
-                   .appendLine ( " found!" )
-                   .append ( "  Name: " )
-                   .appendLine ( name )
-                   .append ( "  Unique Id: " )
-                   .appendLine ( uniqueId )
-                   .append ( "  Player Index: " )
-                   .appendLine ( ( supportsPlayerIdx ? String.valueOf ( controller.getPlayerIndex () ) : "N/A" ) )
-                   .append ( "  Axis Count: " )
-                   .appendLine ( String.valueOf ( axisCount ) )
-                   .append ( "  Button Range: " )
-                   .append ( String.valueOf ( minButtonIndex ) )
-                   .append ( " to " )
-                   .appendLine ( String.valueOf ( maxButtonIndex ) )
-                   .appendLine ( "  Mapping:" )
-                   .append ( "    A: " )
-                   .append ( String.valueOf ( mapping.buttonA ) )
-                   .append ( ", B: " )
-                   .append ( String.valueOf ( mapping.buttonB ) )
-                   .append ( ", X: " )
-                   .append ( String.valueOf ( mapping.buttonX ) )
-                   .append ( ", Y :" )
-                   .appendLine ( String.valueOf ( mapping.buttonY ) )
-                   .append ( "    D-Pad UP: " )
-                   .append ( String.valueOf ( mapping.buttonDpadUp ))
-                   .append ( ", D-Pad DOWN: " )
-                   .append ( String.valueOf ( mapping.buttonDpadDown ))
-                   .append ( ", D-Pad RIGHT: " )
-                   .append ( String.valueOf ( mapping.buttonDpadRight ))
-                   .append ( ", D-Pad LEFT: " )
-                   .appendLine ( String.valueOf ( mapping.buttonDpadLeft ))
-                   .append ( "    L1: " )
-                   .append ( String.valueOf ( mapping.buttonL1 ))
-                   .append ( ", L2: " )
-                   .append ( String.valueOf ( mapping.buttonL2 ))
-                   .append ( ", R1: " )
-                   .append ( String.valueOf ( mapping.buttonR1 ))
-                   .append ( ", R2: " )
-                   .appendLine ( String.valueOf ( mapping.buttonR2 ))
-                   .append ( "    Left-Stick Button: " )
-                   .append ( String.valueOf ( mapping.buttonLeftStick ))
-                   .append ( ", Right-Stick Button: " )
-                   .append ( String.valueOf ( mapping.buttonRightStick ))
-                   .append ( ", Back Button: " )
-                   .append ( String.valueOf ( mapping.buttonBack ))
-                   .append ( ", Start Button: " )
-                   .appendLine ( String.valueOf ( mapping.buttonStart ))
-                   .append ( "    Axis-Left X: " )
-                   .append ( String.valueOf ( mapping.axisLeftX ))
-                   .append ( ", Axis-Left Y: " )
-                   .appendLine ( String.valueOf ( mapping.axisLeftY ) )
-                   .append ( "    Axis-Right X: " )
-                   .append ( String.valueOf ( mapping.axisRightX ))
-                   .append ( ", Axis-Right Y: " )
-                   .appendLine ( String.valueOf ( mapping.axisRightY ) );
-
-            Gdx.app.log ( TAG, stringBuilder.toStringAndClear () );
+        for ( int i = 0; i < Controllers.getControllers ().size; i++ ) {
+            logIndexedGameController ( i );
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.joechamm.gdxtests.controls.controller;
 
+import com.badlogic.gdx.Gdx;
+
 /**
  * File:    MultiplexedController
  * Package: com.joechamm.gdxtests.controls.controller
@@ -10,14 +12,19 @@ package com.joechamm.gdxtests.controls.controller;
  */
 public class MultiplexedController<V extends Controls> extends Controller<V> {
 
+    public static final String TAG = MultiplexedController.class.getName ();
+
     private final Controller[] controllers;
 
     public MultiplexedController(final Controller... controllers) {
+        Gdx.app.debug ( TAG, "ctor; controllers: " + controllers.toString () );
+
         this.controllers = controllers;
     }
 
     @Override
     public boolean isPressed(final V control) {
+        Gdx.app.debug ( TAG, "isPressed ( control: " + control.toString () + " )" );
         for ( Controller controller : controllers ) {
             if ( controller.isPressed ( control ) ) {
                 return true;
@@ -29,6 +36,7 @@ public class MultiplexedController<V extends Controls> extends Controller<V> {
 
     @Override
     public float getAxis ( V control ) {
+        Gdx.app.debug ( TAG, "getAxis ( control: " + control.toString () + " )" );
         for ( final Controller controller : controllers ) {
             final float axis = controller.getAxis ( control );
             if ( 0.0f != axis ) {
@@ -40,6 +48,7 @@ public class MultiplexedController<V extends Controls> extends Controller<V> {
 
     @Override
     public long when(final V control) {
+        Gdx.app.debug ( TAG, "when ( control: " + control.toString () + " )" );
         for ( final Controller controller : controllers ) {
             final long when = controller.when ( control );
             if ( when > 0 ) {

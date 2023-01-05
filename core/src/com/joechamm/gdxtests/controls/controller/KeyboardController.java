@@ -12,12 +12,16 @@ import com.badlogic.gdx.Gdx;
  */
 public class KeyboardController<V extends Controls> extends Controller<V> {
 
+    public static final String TAG = KeyboardController.class.getName ();
+
     public KeyboardController(final ButtonMapper<V> buttonMapper) {
+        Gdx.app.debug ( TAG, "ctor; buttonMapper: " + buttonMapper.toString () );
         super.buttonMapper = buttonMapper;
     }
 
     @Override
     public boolean isPressed(V control) {
+        Gdx.app.debug ( TAG, "isPressed ( control: " + control.toString () + " )" );
         final boolean pressed = Gdx.input.isKeyPressed ( buttonMapper.get ( control ) );
         if ( pressed ) {
             record ( control );
@@ -27,6 +31,7 @@ public class KeyboardController<V extends Controls> extends Controller<V> {
 
     @Override
     public float getAxis ( V control ) {
+        Gdx.app.debug ( TAG, "getAxis ( control: " + control.toString () + " )" );
         return 0;
     }
 }

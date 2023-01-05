@@ -33,6 +33,7 @@ import com.joechamm.gdxtests.controls.Laser;
 import com.joechamm.gdxtests.controls.PlayerShip;
 import com.joechamm.gdxtests.controls.controller.Controller;
 import com.joechamm.gdxtests.controls.controller.ControllerFactory;
+import com.joechamm.gdxtests.controls.controller.DebugControls;
 import com.joechamm.gdxtests.controls.controller.GameControls;
 
 import java.util.LinkedList;
@@ -90,6 +91,9 @@ public class GameScreen implements Screen {
     BitmapFont font;
     float hudVerticalMargin, hudLeftX, hudRightX, hudCenterX, hudRow1Y, hudRow2Y, hudSectionWidth;
 
+    /// DEBUGGING
+    private DebugControls debugControls;
+
     public GameScreen( JCGdxTestControls jcGdxTestControls ) {
         Gdx.app.debug ( TAG, "ctor" );
 
@@ -97,6 +101,17 @@ public class GameScreen implements Screen {
 
         camera = new OrthographicCamera ();
         viewport = new StretchViewport ( WORLD_WIDTH, WORLD_HEIGHT, camera );
+
+        debugControls = DebugControls.getInstance ( jcGdxTestControls );
+
+        /// DEBUGGING
+
+        Gdx.app.debug ( TAG, "logging available peripherals" );
+        DebugControls.logAvailablePeripherals ();
+        Gdx.app.debug ( TAG, "logging available controllers" );
+        DebugControls.logAvailableControllers ();
+
+        /// END DEBUGGING
 
         if ( parent.getPreferences ().isGamepadEnabled () ) {
             controllerPlayer1 = ControllerFactory.buildLogitechController ();
