@@ -11,7 +11,14 @@ package com.joechamm.gdxtests.controls.view;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.controllers.ControllerListener;
+import com.badlogic.gdx.controllers.ControllerMapping;
+import com.badlogic.gdx.controllers.Controllers;
+import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -24,6 +31,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.joechamm.gdxtests.controls.EnemyShip;
@@ -31,16 +39,15 @@ import com.joechamm.gdxtests.controls.Explosion;
 import com.joechamm.gdxtests.controls.JCGdxTestControls;
 import com.joechamm.gdxtests.controls.Laser;
 import com.joechamm.gdxtests.controls.PlayerShip;
-import com.joechamm.gdxtests.controls.controller.Controller;
-import com.joechamm.gdxtests.controls.controller.ControllerFactory;
-import com.joechamm.gdxtests.controls.controller.DebugControls;
-import com.joechamm.gdxtests.controls.controller.GameControls;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Locale;
 
-public class GameScreen implements Screen {
+public class GameScreen implements
+                        Screen,
+                        InputProcessor,
+                        ControllerListener {
 
     public static final String TAG = GameScreen.class.getName ();
 
@@ -48,7 +55,11 @@ public class GameScreen implements Screen {
     private JCGdxTestControls parent;
 
     // controller
-    private Controller controllerPlayer1;
+//    private Controller controllerPlayer1;
+    private boolean useGamepad = false;
+    private Controller controllerPlayer1 = null;
+    private int controllerPlayerIndex = - 1;
+    private int controllerArrayIndex = - 1;
 
     // screen
     private Camera camera;
@@ -72,6 +83,8 @@ public class GameScreen implements Screen {
     private float timeBetweenEnemySpawns = 3f;
     private float enemySpawnTimer = 0;
 
+    private boolean isPaused = false;
+
     // world parameters
     private final float WORLD_WIDTH = 72.0f;
     private final float WORLD_HEIGHT = 128.0f;
@@ -92,7 +105,7 @@ public class GameScreen implements Screen {
     float hudVerticalMargin, hudLeftX, hudRightX, hudCenterX, hudRow1Y, hudRow2Y, hudSectionWidth;
 
     /// DEBUGGING
-    private DebugControls debugControls;
+//    private DebugControls debugControls;
 
     public GameScreen( JCGdxTestControls jcGdxTestControls ) {
         Gdx.app.debug ( TAG, "ctor" );
@@ -102,22 +115,50 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera ();
         viewport = new StretchViewport ( WORLD_WIDTH, WORLD_HEIGHT, camera );
 
-        debugControls = DebugControls.getInstance ( jcGdxTestControls );
+        if ( parent.getPreferences ().isGamepadEnabled () ) {
+            useGamepad = true;
+
+            try {
+                if ( Controllers.getControllers ().isEmpty () ) {
+                    throw new GdxRuntimeException ( "NO CONTROLLERS AVAILABLE" );
+                }
+
+                Controller currentController = Controllers.getCurrent ();
+
+                if ( currentController != null ) {
+                    controllerPlayer1 = currentController;
+                    controllerArrayIndex = Controllers.getControllers ().indexOf ( currentController, true );
+                    controllerPlayerIndex = controllerPlayer1.getPlayerIndex ();
+                } else {
+                    controllerPlayer1 = Controllers.getControllers ().first ();
+                    controllerArrayIndex = Controllers.getControllers ().indexOf ( controllerPlayer1, true );
+                    controllerPlayerIndex = controllerPlayer1.getPlayerIndex ();
+                }
+
+                Controllers.clearListeners ();
+                Controllers.addListener ( this );
+
+            } catch ( GdxRuntimeException e ) {
+                Gdx.app.error ( TAG, e.getLocalizedMessage (), e.getCause () );
+            }
+        }
+
+ //       debugControls = DebugControls.getInstance ( jcGdxTestControls );
 
         /// DEBUGGING
 
-        Gdx.app.debug ( TAG, "logging available peripherals" );
-        DebugControls.logAvailablePeripherals ();
-        Gdx.app.debug ( TAG, "logging available controllers" );
-        DebugControls.logAvailableControllers ();
+//        Gdx.app.debug ( TAG, "logging available peripherals" );
+//        DebugControls.logAvailablePeripherals ();
+//        Gdx.app.debug ( TAG, "logging available controllers" );
+//        DebugControls.logAvailableControllers ();
 
         /// END DEBUGGING
 
-        if ( parent.getPreferences ().isGamepadEnabled () ) {
-            controllerPlayer1 = ControllerFactory.buildLogitechController ();
-        } else {
-            controllerPlayer1 = ControllerFactory.buildKeyboardController ();
-        }
+//        if ( parent.getPreferences ().isGamepadEnabled () ) {
+//            controllerPlayer1 = ControllerFactory.buildLogitechController ();
+//        } else {
+//            controllerPlayer1 = ControllerFactory.buildKeyboardController ();
+//        }
 
         // setup texture atlas
  //       atlas = new TextureAtlas ( "images.atlas" );
@@ -207,7 +248,9 @@ public class GameScreen implements Screen {
 
     @Override
     public void show () {
-
+        Gdx.app.debug ( TAG, "show" );
+        InputMultiplexer inputMultiplexer = (InputMultiplexer) Gdx.input.getInputProcessor ();
+        inputMultiplexer.addProcessor ( this );
     }
 
     @Override
@@ -385,13 +428,15 @@ public class GameScreen implements Screen {
         // strategy: determine the max distance the ship can move
         // check each key that matters and move accordingly
 
-        float leftLimit, rightLimit, upLimit, downLimit;
+        float leftLimit, rightLimit, upLimit, downLimit, xMove, yMove;
         leftLimit = - playerShip.boundingBox.x;
         downLimit = - playerShip.boundingBox.y;
         rightLimit = WORLD_WIDTH - playerShip.boundingBox.x - playerShip.boundingBox.width;
         upLimit = (float)WORLD_HEIGHT / 2 - playerShip.boundingBox.y - playerShip.boundingBox.height;
+        xMove = 0.0f;
+        yMove = 0.0f;
 
-        if(controllerPlayer1.isPressed ( GameControls.BUTTON_DPAD_RIGHT ) && rightLimit > 0) {
+    /*    if(controllerPlayer1.isPressed ( GameControls.BUTTON_DPAD_RIGHT ) && rightLimit > 0) {
             playerShip.translate ( Math.min ( playerShip.movementSpeed * delta, rightLimit ), 0f );
         }
 
@@ -405,10 +450,83 @@ public class GameScreen implements Screen {
 
         if(controllerPlayer1.isPressed ( GameControls.BUTTON_DPAD_DOWN ) && downLimit < 0) {
             playerShip.translate ( 0f, Math.max ( - playerShip.movementSpeed * delta, downLimit ) );
+        }*/
+
+        if ( useGamepad &&
+                controllerPlayer1 != null ) {
+            float axisX = controllerPlayer1.getAxis ( controllerPlayer1.getMapping ().axisLeftX );
+            float axisY = - controllerPlayer1.getAxis ( controllerPlayer1.getMapping ().axisLeftY );
+
+            xMove = axisX * playerShip.movementSpeed * delta;
+            yMove = axisY * playerShip.movementSpeed * delta;
+        } else {
+            // check for mouse/touch input
+            if ( Gdx.input.isTouched () ) {
+                // get the screen position of the touch
+                float xTouchPixels = Gdx.input.getX ();
+                float yTouchPixels = Gdx.input.getY ();
+
+                // convert to world position
+                Vector2 touchPoint = new Vector2 ( xTouchPixels, yTouchPixels );
+                touchPoint = viewport.unproject ( touchPoint );
+
+                // calculate the x and y differences
+                Vector2 playerShipCenter = new Vector2 ( playerShip.boundingBox.x + playerShip.boundingBox.width / 2,
+                                                         playerShip.boundingBox.y + playerShip.boundingBox.height / 2 );
+
+                float touchDistance = touchPoint.dst ( playerShipCenter );
+
+                if ( touchDistance > TOUCH_MOVEMENT_THRESHOLD ) {
+                    float xTouchDifference = touchPoint.x - playerShipCenter.x;
+                    float yTouchDifference = touchPoint.y - playerShipCenter.y;
+
+                    // scale to the maximum speed of the ship
+                    xMove = ( xTouchDifference / touchDistance ) * playerShip.movementSpeed * delta;
+                    yMove = ( yTouchDifference / touchDistance ) * playerShip.movementSpeed * delta;
+                }
+            } else {
+                if ( Gdx.input.isKeyPressed ( Input.Keys.UP ) ) {
+                    yMove = playerShip.movementSpeed * delta;
+                }
+
+                if ( Gdx.input.isKeyPressed ( Input.Keys.DOWN ) ) {
+                    yMove = - playerShip.movementSpeed * delta;
+                }
+
+                if ( Gdx.input.isKeyPressed ( Input.Keys.RIGHT ) ) {
+                    xMove = playerShip.movementSpeed * delta;
+                }
+
+                if ( Gdx.input.isKeyPressed ( Input.Keys.LEFT ) ) {
+                    xMove = - playerShip.movementSpeed * delta;
+                }
+            }
         }
 
+        if(xMove > 0 &&
+                rightLimit > 0) {
+            xMove = Math.min ( xMove, rightLimit );
+        }
+
+        if ( xMove < 0 &&
+                leftLimit < 0 ) {
+            xMove = Math.max ( xMove, leftLimit );
+        }
+
+        if ( yMove > 0 &&
+                upLimit > 0) {
+            yMove = Math.min ( yMove, upLimit );
+        }
+
+        if ( yMove < 0 &&
+                downLimit < 0 ) {
+            Math.max ( yMove, downLimit );
+        }
+
+        playerShip.translate ( xMove, yMove );
+
         // touch input (also mouse)
-        if ( Gdx.input.isTouched () ) {
+     /*   if ( Gdx.input.isTouched () ) {
             // get the screen position of the touch
             float xTouchPixels = Gdx.input.getX ();
             float yTouchPixels = Gdx.input.getY ();
@@ -445,7 +563,7 @@ public class GameScreen implements Screen {
 
                 playerShip.translate ( xMove, yMove );
             }
-        }
+        }*/
     }
 
     private void detectCollisions () {
@@ -577,28 +695,265 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize ( int width, int height ) {
+        Gdx.app.debug ( TAG, "resize: " + width + " x " + height );
         viewport.update ( width, height, true );
         sb.setProjectionMatrix ( camera.combined );
     }
 
     @Override
     public void pause () {
-
+        Gdx.app.debug ( TAG, "pause" );
+        isPaused = true;
     }
 
     @Override
     public void resume () {
-
+        Gdx.app.debug ( TAG, "resume" );
+        isPaused = false;
     }
 
     @Override
     public void hide () {
-
+        Gdx.app.debug ( TAG, "hide" );
+        InputMultiplexer inputMultiplexer = (InputMultiplexer) Gdx.input.getInputProcessor ();
+        inputMultiplexer.removeProcessor ( this );
     }
 
     @Override
     public void dispose () {
-
+        Gdx.app.debug ( TAG, "dispose" );
+        sb.dispose ();
     }
 
+    /**
+     * Called when a key was pressed
+     *
+     * @param keycode one of the constants in {@link Input.Keys}
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean keyDown ( int keycode ) {
+
+        switch ( keycode ) {
+            case Input.Keys.BACKSPACE:
+                parent.changeScreen ( JCGdxTestControls.MENU );
+                return true;
+            case Input.Keys.ESCAPE:
+                Gdx.app.exit ();
+                return true;
+            case Input.Keys.SPACE:
+                if ( isPaused ) {
+                    this.resume ();
+                } else {
+                    this.pause ();
+                }
+                return true;
+            default:
+                break;
+        }
+
+        return false;
+    }
+
+    /**
+     * Called when a key was released
+     *
+     * @param keycode one of the constants in {@link Input.Keys}
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean keyUp ( int keycode ) {
+        return false;
+    }
+
+    /**
+     * Called when a key was typed
+     *
+     * @param character The character
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean keyTyped ( char character ) {
+        return false;
+    }
+
+    /**
+     * Called when the screen was touched or a mouse button was pressed. The button parameter will be {@link Buttons#LEFT} on iOS.
+     *
+     * @param screenX The x coordinate, origin is in the upper left corner
+     * @param screenY The y coordinate, origin is in the upper left corner
+     * @param pointer the pointer for the event.
+     * @param button  the button
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean touchDown ( int screenX, int screenY, int pointer, int button ) {
+        return false;
+    }
+
+    /**
+     * Called when a finger was lifted or a mouse button was released. The button parameter will be {@link Buttons#LEFT} on iOS.
+     *
+     * @param screenX
+     * @param screenY
+     * @param pointer the pointer for the event.
+     * @param button  the button
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean touchUp ( int screenX, int screenY, int pointer, int button ) {
+        return false;
+    }
+
+    /**
+     * Called when a finger or the mouse was dragged.
+     *
+     * @param screenX
+     * @param screenY
+     * @param pointer the pointer for the event.
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean touchDragged ( int screenX, int screenY, int pointer ) {
+        return false;
+    }
+
+    /**
+     * Called when the mouse was moved without any buttons being pressed. Will not be called on iOS.
+     *
+     * @param screenX
+     * @param screenY
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean mouseMoved ( int screenX, int screenY ) {
+        return false;
+    }
+
+    /**
+     * Called when the mouse wheel was scrolled. Will not be called on iOS.
+     *
+     * @param amountX the horizontal scroll amount, negative or positive depending on the direction the wheel was scrolled.
+     * @param amountY the vertical scroll amount, negative or positive depending on the direction the wheel was scrolled.
+     *
+     * @return whether the input was processed.
+     */
+    @Override
+    public boolean scrolled ( float amountX, float amountY ) {
+        return false;
+    }
+
+    /**
+     * A {@link Controller} got connected.
+     *
+     * @param controller
+     */
+    @Override
+    public void connected ( Controller controller ) {
+        Gdx.app.debug ( TAG, "connected: " + controller.getName () + "/" + controller.getUniqueId () );
+        if ( useGamepad ) {
+            if(null == controllerPlayer1) {
+                controllerPlayer1 = controller;
+                controllerPlayerIndex = controllerPlayer1.getPlayerIndex ();
+                controllerArrayIndex = Controllers.getControllers ().indexOf ( controller, true );
+                return;
+            }
+
+            if ( controller == controllerPlayer1 ) {
+                controllerPlayerIndex = controller.getPlayerIndex ();
+                controllerArrayIndex = Controllers.getControllers ().indexOf ( controller, true );
+                this.resume ();
+            }
+        }
+    }
+
+    /**
+     * A {@link Controller} got disconnected.
+     *
+     * @param controller
+     */
+    @Override
+    public void disconnected ( Controller controller ) {
+        Gdx.app.debug ( TAG, "disconnected: " + controller.getName () + "/" + controller.getUniqueId () );
+        if ( useGamepad &&
+            controllerPlayer1 != null) {
+            if(controller == controllerPlayer1) {
+                controllerPlayer1 = null;
+                controllerPlayerIndex = - 1;
+                controllerArrayIndex = - 1;
+                this.pause ();
+            }
+        }
+    }
+
+    /**
+     * A button on the {@link Controller} was pressed. The buttonCode is controller specific. The
+     * <code>com.badlogic.gdx.controllers.mapping</code> package hosts button constants for known controllers.
+     *
+     * @param controller
+     * @param buttonCode
+     *
+     * @return whether to hand the event to other listeners.
+     */
+    @Override
+    public boolean buttonDown ( Controller controller, int buttonCode ) {
+        Gdx.app.debug ( TAG, controller.getName () + "/" + controller.getUniqueId () + " pressed " + buttonCode);
+        if ( useGamepad &&
+                controller == controllerPlayer1 ) {
+
+            final ControllerMapping mapping = controller.getMapping ();
+
+            if ( buttonCode == mapping.buttonBack ) {
+                parent.changeScreen ( JCGdxTestControls.MENU );
+                return true;
+            }
+
+            if ( buttonCode == mapping.buttonStart ) {
+                if ( isPaused ) {
+                    this.resume ();
+                } else {
+                    this.pause ();
+                }
+
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * A button on the {@link Controller} was released. The buttonCode is controller specific. The
+     * <code>com.badlogic.gdx.controllers.mapping</code> package hosts button constants for known controllers.
+     *
+     * @param controller
+     * @param buttonCode
+     *
+     * @return whether to hand the event to other listeners.
+     */
+    @Override
+    public boolean buttonUp ( Controller controller, int buttonCode ) {
+        return false;
+    }
+
+    /**
+     * An axis on the {@link Controller} moved. The axisCode is controller specific. The axis value is in the range [-1, 1]. The
+     * <code>com.badlogic.gdx.controllers.mapping</code> package hosts axes constants for known controllers.
+     *
+     * @param controller
+     * @param axisCode
+     * @param value      the axis value, -1 to 1
+     *
+     * @return whether to hand the event to other listeners.
+     */
+    @Override
+    public boolean axisMoved ( Controller controller, int axisCode, float value ) {
+        return false;
+    }
 }

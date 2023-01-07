@@ -14,7 +14,13 @@ import static com.badlogic.gdx.scenes.scene2d.Touchable.enabled;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Event;
@@ -36,9 +42,10 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.joechamm.gdxtests.controls.JCGdxTestControls;
 
-import java.awt.Checkbox;
-
-public class PreferencesScreen implements Screen {
+public class PreferencesScreen implements
+                               Screen,
+                               InputProcessor,
+                               ControllerListener {
 
     public static final String TAG = PreferencesScreen.class.getName ();
 
@@ -61,7 +68,11 @@ public class PreferencesScreen implements Screen {
         Gdx.app.debug ( TAG, "show" );
 
         stage.clear ();
-        Gdx.input.setInputProcessor ( stage );
+  //      Gdx.input.setInputProcessor ( stage );
+        InputMultiplexer inputMultiplexer = (InputMultiplexer) Gdx.input.getInputProcessor ();
+        inputMultiplexer.addProcessor ( stage );
+        inputMultiplexer.addProcessor ( this );
+
         stage.setDebugAll ( true );
 
         skin = parent.assetManager.manager.get ( parent.assetManager.skinJson );
@@ -397,6 +408,8 @@ public class PreferencesScreen implements Screen {
     @Override
     public void hide () {
         Gdx.app.debug ( TAG, "hide" );
+        InputMultiplexer inputMultiplexer = (InputMultiplexer) Gdx.input.getInputProcessor ();
+        inputMultiplexer.removeProcessor ( this );
     }
 
     @Override
@@ -405,4 +418,172 @@ public class PreferencesScreen implements Screen {
         stage.dispose ();
     }
 
+    /**
+     * Called when a key was pressed
+     *
+     * @param keycode one of the constants in {@link Input.Keys}
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean keyDown ( int keycode ) {
+        return false;
+    }
+
+    /**
+     * Called when a key was released
+     *
+     * @param keycode one of the constants in {@link Input.Keys}
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean keyUp ( int keycode ) {
+        return false;
+    }
+
+    /**
+     * Called when a key was typed
+     *
+     * @param character The character
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean keyTyped ( char character ) {
+        return false;
+    }
+
+    /**
+     * Called when the screen was touched or a mouse button was pressed. The button parameter will be {@link Buttons#LEFT} on iOS.
+     *
+     * @param screenX The x coordinate, origin is in the upper left corner
+     * @param screenY The y coordinate, origin is in the upper left corner
+     * @param pointer the pointer for the event.
+     * @param button  the button
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean touchDown ( int screenX, int screenY, int pointer, int button ) {
+        return false;
+    }
+
+    /**
+     * Called when a finger was lifted or a mouse button was released. The button parameter will be {@link Buttons#LEFT} on iOS.
+     *
+     * @param screenX
+     * @param screenY
+     * @param pointer the pointer for the event.
+     * @param button  the button
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean touchUp ( int screenX, int screenY, int pointer, int button ) {
+        return false;
+    }
+
+    /**
+     * Called when a finger or the mouse was dragged.
+     *
+     * @param screenX
+     * @param screenY
+     * @param pointer the pointer for the event.
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean touchDragged ( int screenX, int screenY, int pointer ) {
+        return false;
+    }
+
+    /**
+     * Called when the mouse was moved without any buttons being pressed. Will not be called on iOS.
+     *
+     * @param screenX
+     * @param screenY
+     *
+     * @return whether the input was processed
+     */
+    @Override
+    public boolean mouseMoved ( int screenX, int screenY ) {
+        return false;
+    }
+
+    /**
+     * Called when the mouse wheel was scrolled. Will not be called on iOS.
+     *
+     * @param amountX the horizontal scroll amount, negative or positive depending on the direction the wheel was scrolled.
+     * @param amountY the vertical scroll amount, negative or positive depending on the direction the wheel was scrolled.
+     *
+     * @return whether the input was processed.
+     */
+    @Override
+    public boolean scrolled ( float amountX, float amountY ) {
+        return false;
+    }
+
+    /**
+     * A {@link Controller} got connected.
+     *
+     * @param controller
+     */
+    @Override
+    public void connected ( Controller controller ) {
+
+    }
+
+    /**
+     * A {@link Controller} got disconnected.
+     *
+     * @param controller
+     */
+    @Override
+    public void disconnected ( Controller controller ) {
+
+    }
+
+    /**
+     * A button on the {@link Controller} was pressed. The buttonCode is controller specific. The
+     * <code>com.badlogic.gdx.controllers.mapping</code> package hosts button constants for known controllers.
+     *
+     * @param controller
+     * @param buttonCode
+     *
+     * @return whether to hand the event to other listeners.
+     */
+    @Override
+    public boolean buttonDown ( Controller controller, int buttonCode ) {
+        return false;
+    }
+
+    /**
+     * A button on the {@link Controller} was released. The buttonCode is controller specific. The
+     * <code>com.badlogic.gdx.controllers.mapping</code> package hosts button constants for known controllers.
+     *
+     * @param controller
+     * @param buttonCode
+     *
+     * @return whether to hand the event to other listeners.
+     */
+    @Override
+    public boolean buttonUp ( Controller controller, int buttonCode ) {
+        return false;
+    }
+
+    /**
+     * An axis on the {@link Controller} moved. The axisCode is controller specific. The axis value is in the range [-1, 1]. The
+     * <code>com.badlogic.gdx.controllers.mapping</code> package hosts axes constants for known controllers.
+     *
+     * @param controller
+     * @param axisCode
+     * @param value      the axis value, -1 to 1
+     *
+     * @return whether to hand the event to other listeners.
+     */
+    @Override
+    public boolean axisMoved ( Controller controller, int axisCode, float value ) {
+        return false;
+    }
 }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -40,6 +41,9 @@ public class JCGdxTestControls extends Game {
 
 	// audio manager
     public JCGdxAudioManager audioManager = null;
+
+	// handle input
+	private InputMultiplexer inputMultiplexer;
 
 	// TODO: move random to "GameLogic" type class
 	public static Random random = new Random ();
@@ -96,6 +100,9 @@ public class JCGdxTestControls extends Game {
 			Gdx.app.error ( TAG, "OH NO! failed to initialize audio preferences." );
 			Gdx.app.exit ();
 		}
+
+		inputMultiplexer = new InputMultiplexer ();
+		Gdx.input.setInputProcessor ( inputMultiplexer );
 
 		loadingScreen = new LoadingScreen ( this );
 		setScreen ( loadingScreen );
